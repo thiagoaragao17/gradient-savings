@@ -4,7 +4,12 @@ import { db } from './supabase'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { randomBytes } from 'crypto'
 import type { Prospect } from './types'
+
+function generateToken(): string {
+  return randomBytes(3).toString('hex') // 6 lowercase hex chars e.g. "a3k9m2"
+}
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -72,6 +77,7 @@ function parseProspectForm(formData: FormData) {
     monthly_savings: monthly,
     annual_savings: monthly * 12,
     helcim_tier: Number(formData.get('helcim_tier') ?? 2),
+    helcim_comparison_number: Number(formData.get('helcim_comparison_number')) || null,
     helcim_link: (formData.get('helcim_link') as string)?.trim() || null,
     signup_url: (formData.get('signup_url') as string)?.trim() || null,
     rep_name: (formData.get('rep_name') as string)?.trim() || null,
@@ -120,14 +126,14 @@ export async function createProspect(
 ): Promise<{ error: string } | null> {
   const payload = parseProspectForm(formData)
 
-  // Ensure slug is unique — append -2, -3, … if already taken
-  let slug = payload.slug
-  let attempt = 1
+  // Generate opaque slug: [6-char token]-[helcim_comparison_number or random fallback]
+  const suffix = payload.helcim_comparison_number ?? parseInt(randomBytes(2).toString('hex'), 16)
+  let slug = `${generateToken()}-${suffix}`
+  // Guarantee uniqueness (collision is astronomically unlikely but handle it)
   while (true) {
     const { data } = await db.from('prospects').select('id').eq('slug', slug).maybeSingle()
     if (!data) break
-    attempt++
-    slug = `${payload.slug}-${attempt}`
+    slug = `${generateToken()}-${suffix}`
   }
   payload.slug = slug
 

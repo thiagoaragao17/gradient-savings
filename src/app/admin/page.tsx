@@ -64,6 +64,7 @@ export default async function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
+                    <th className="text-left px-6 py-3 font-semibold">Quote ID</th>
                     <th className="text-left px-6 py-3 font-semibold">Company</th>
                     <th className="text-left px-6 py-3 font-semibold">Created</th>
                     <th className="text-left px-6 py-3 font-semibold">Provider</th>
@@ -135,6 +136,9 @@ function ProspectRow({ prospect: p }: { prospect: Prospect }) {
 
   return (
     <tr className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors">
+      <td className="px-6 py-4 text-xs text-gray-400 font-mono">
+        {p.helcim_comparison_number ? `#${p.helcim_comparison_number}` : '—'}
+      </td>
       <td className="px-6 py-4">
         <div className="font-medium text-brand-900">{p.company_name}</div>
         {p.company_address && (

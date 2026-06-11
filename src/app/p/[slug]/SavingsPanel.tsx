@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Zap } from 'lucide-react'
 import type { Prospect } from '@/lib/types'
 
@@ -125,7 +126,7 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
           <span className="w-24 text-center text-xs font-semibold text-white leading-tight">
             {prospect.current_provider}
           </span>
-          <span className="w-24 text-center text-xs font-semibold text-white">Gradient</span>
+          <span className="w-24 flex justify-center"><Image src="/logo-payments-white.svg" alt="Gradient Payments" width={80} height={14} /></span>
         </div>
 
         <div className="flex items-end justify-center gap-6">

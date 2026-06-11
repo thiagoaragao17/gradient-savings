@@ -70,10 +70,10 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100 no-print">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-5">
-            <Image src="/logo-payments.svg" alt="Gradient Payments" width={140} height={26} priority />
+            <Image src="/logo-header.svg" alt="Gradient MSP" width={160} height={40} priority />
             <div className="hidden md:block h-5 w-px bg-gray-200" />
             <div className="hidden md:block">
-              <p className="text-sm font-semibold text-gray-800">{prospect.company_name}</p>
+              <p className="text-sm font-semibold text-gray-800 uppercase tracking-wide">{prospect.company_name}</p>
               <p className="text-xs text-gray-400">
                 Payment Analysis · Valid through {fmtDate(prospect.expiry_date)}
               </p>
@@ -94,7 +94,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
             {/* 1. Prospect information */}
             <section className="border border-gray-100 rounded-2xl overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100">
-                <p className="font-bold text-gray-900 text-lg">{prospect.company_name}</p>
+                <p className="font-bold text-gray-900 text-lg uppercase tracking-wide">{prospect.company_name}</p>
                 {prospect.company_address && (
                   <p className="text-sm text-gray-400 mt-0.5">{prospect.company_address}</p>
                 )}
@@ -253,7 +253,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
           </p>
           <div className="flex items-center gap-4 opacity-50">
             <Image src="/logo-footer.svg" alt="Gradient MSP" width={110} height={22} />
-            <span className="text-xs text-gray-400">Powered by Helcim</span>
+            <span className="text-xs text-gray-400 flex items-center gap-1.5">Powered by <Image src="/helcim-logo.svg" alt="Helcim" width={46} height={14} className="opacity-70" /></span>
           </div>
         </footer>
 
@@ -290,7 +290,7 @@ function NetworkTable({ label, network }: { label: string; network: CardNetworkD
               <th className="text-right px-4 py-2.5 font-semibold">Volume</th>
               <th className="text-right px-4 py-2.5 font-semibold">Interchange</th>
               <th className="text-right px-4 py-2.5 font-semibold">Card Brand</th>
-              <th className="text-right px-4 py-2.5 font-semibold">Gradient</th>
+              <th className="text-right px-4 py-2.5 font-semibold"><Image src="/logo-header.svg" alt="Gradient" width={70} height={18} /></th>
               <th className="text-right px-4 py-2.5 font-semibold">Cost</th>
             </tr>
           </thead>

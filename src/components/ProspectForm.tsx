@@ -353,6 +353,11 @@ export default function ProspectForm({ prospect, action }: Props) {
               placeholder="https://app.helcim.com/signup?..."
             />
           </Field>
+          <input
+            type="hidden"
+            name="helcim_comparison_number"
+            value={prospect?.helcim_comparison_number ?? ''}
+          />
           <Field label="Original Helcim Link" hint="Optional reference">
             <input
               name="helcim_link"
@@ -371,7 +376,7 @@ export default function ProspectForm({ prospect, action }: Props) {
           <Field label="Name">
             <input
               name="rep_name"
-              defaultValue={prospect?.rep_name ?? 'Daniella Thorleifson'}
+              defaultValue={prospect?.rep_name ?? 'Colin Knox'}
               className={input}
               placeholder="Jane Smith"
             />
@@ -380,7 +385,7 @@ export default function ProspectForm({ prospect, action }: Props) {
             <input
               name="rep_email"
               type="email"
-              defaultValue={prospect?.rep_email ?? 'daniella.thorleifson@meetgradient.com'}
+              defaultValue={prospect?.rep_email ?? 'colin.knox@meetgradient.com'}
               className={input}
               placeholder="jane@yourcompany.com"
             />

@@ -192,6 +192,10 @@ export function parseHelcimText(text: string): ParsedProspect {
     if (!p.annual_savings) p.annual_savings = p.monthly_savings * 12
   }
 
+  // ── Helcim comparison number ───────────────────────────────────────────────
+  const compNumMatch = text.match(/Statement Comparison\s+#(\d+)/i)
+  if (compNumMatch) p.helcim_comparison_number = parseInt(compNumMatch[1])
+
   // ── Tier ───────────────────────────────────────────────────────────────────
   const tierMatch = text.match(/\bTier\s+([1-5])\b/i)
   if (tierMatch) p.helcim_tier = parseInt(tierMatch[1])

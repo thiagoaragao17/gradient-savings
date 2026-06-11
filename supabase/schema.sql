@@ -24,6 +24,7 @@ create table if not exists prospects (
   monthly_savings         numeric not null default 0,
   annual_savings          numeric not null default 0,
   helcim_tier             integer not null default 2,
+  helcim_comparison_number integer,
   helcim_link             text,
   signup_url              text,
   interchange_data        jsonb not null default '{}',

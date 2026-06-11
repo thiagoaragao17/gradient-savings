@@ -44,6 +44,7 @@ export interface Prospect {
   monthly_savings: number
   annual_savings: number
   helcim_tier: number
+  helcim_comparison_number: number | null
   helcim_link: string | null
   signup_url: string | null
   interchange_data: InterchangeData
