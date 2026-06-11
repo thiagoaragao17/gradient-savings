@@ -172,9 +172,8 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
               </table>
               <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 border-t border-gray-100">
                 <div className="px-6 py-4">
-                  <p className="text-sm font-semibold text-gray-900">Fee Saver Rate</p>
+                  <p className="text-sm font-semibold text-gray-900">0% Fee Saver Rate</p>
                   <p className="text-xs text-gray-400 mt-0.5">Credit card fees passed to customers via surcharging</p>
-                  <p className="text-sm font-bold text-brand-600 mt-1">0%</p>
                 </div>
                 <div className="px-6 py-4">
                   <p className="text-sm font-semibold text-gray-900">No Extra Fees</p>
