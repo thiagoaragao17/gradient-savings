@@ -37,7 +37,8 @@ create table if not exists prospects (
   last_viewed_at          timestamptz,
   rep_name                text,
   rep_email               text,
-  rep_phone               text
+  rep_phone               text,
+  rep_photo               text
 );
 
 create table if not exists prospect_views (
@@ -85,6 +86,7 @@ create table if not exists app_settings (
   id                    integer primary key default 1,
   rep_name              text not null default 'Colin Knox',
   rep_email             text not null default 'colin.knox@meetgradient.com',
+  rep_photo             text,
   default_expiry_days   integer not null default 90,
   signup_url_template   text,
   constraint single_row check (id = 1)

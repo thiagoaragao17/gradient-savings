@@ -32,23 +32,13 @@ export default function SettingsForm({ settings }: { settings: AppSettings }) {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Name">
-            <input
-              name="rep_name"
-              defaultValue={settings.rep_name}
-              required
-              className={input}
-              placeholder="Colin Knox"
-            />
+            <input name="rep_name" defaultValue={settings.rep_name} required className={input} placeholder="Colin Knox" />
           </Field>
           <Field label="Email">
-            <input
-              name="rep_email"
-              type="email"
-              defaultValue={settings.rep_email}
-              required
-              className={input}
-              placeholder="colin.knox@meetgradient.com"
-            />
+            <input name="rep_email" type="email" defaultValue={settings.rep_email} required className={input} placeholder="colin.knox@meetgradient.com" />
+          </Field>
+          <Field label="Photo URL or path" hint="e.g. /avatars/colin-knox.png">
+            <input name="rep_photo" defaultValue={settings.rep_photo ?? ''} className={input} placeholder="/avatars/colin-knox.png" />
           </Field>
         </div>
       </section>

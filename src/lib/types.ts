@@ -54,6 +54,7 @@ export interface Prospect {
   rep_name: string | null
   rep_email: string | null
   rep_phone: string | null
+  rep_photo: string | null
   created_at: string
   view_count: number
   first_viewed_at: string | null

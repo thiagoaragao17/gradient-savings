@@ -272,6 +272,7 @@ function parseProspectForm(formData: FormData) {
     rep_name: (formData.get('rep_name') as string)?.trim() || null,
     rep_email: (formData.get('rep_email') as string)?.trim() || null,
     rep_phone: (formData.get('rep_phone') as string)?.trim() || null,
+    rep_photo: (formData.get('rep_photo') as string)?.trim() || null,
     expiry_date: formData.get('expiry_date') as string,
     status: (formData.get('status') as Prospect['status']) ?? 'active',
     interchange_data: interchangeData,
@@ -426,6 +427,7 @@ export async function logProspectView(prospectId: string) {
 export interface AppSettings {
   rep_name: string
   rep_email: string
+  rep_photo: string | null
   default_expiry_days: number
   signup_url_template: string | null
 }
@@ -435,6 +437,7 @@ export async function getSettings(): Promise<AppSettings> {
   return (data as AppSettings) ?? {
     rep_name: 'Colin Knox',
     rep_email: 'colin.knox@meetgradient.com',
+    rep_photo: null,
     default_expiry_days: 90,
     signup_url_template: null,
   }
@@ -447,6 +450,7 @@ export async function saveSettings(
   const settings = {
     rep_name: (formData.get('rep_name') as string).trim(),
     rep_email: (formData.get('rep_email') as string).trim(),
+    rep_photo: (formData.get('rep_photo') as string)?.trim() || null,
     default_expiry_days: Number(formData.get('default_expiry_days')) || 90,
     signup_url_template: (formData.get('signup_url_template') as string)?.trim() || null,
   }

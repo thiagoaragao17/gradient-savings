@@ -53,6 +53,52 @@ body {
 }
 
 @media print {
-  .no-print { display: none !important; }
-  body { background: #fff !important; }
+  /* Force backgrounds/colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    text-shadow: none !important;
+  }
+
+  @page {
+    margin: 0.5in;
+    size: letter portrait;
+  }
+
+  body {
+    background: #fff !important;
+    font-size: 11pt;
+  }
+
+  /* Hide interactive / screen-only elements */
+  .no-print          { display: none !important; }
+  .print-hide        { display: none !important; }
+
+  /* Kill sticky so the savings panel flows normally */
+  .sticky { position: static !important; }
+
+  /* Stack the two-column layout vertically */
+  .prospect-columns {
+    flex-direction: column !important;
+  }
+
+  /* Savings panel full-width */
+  .prospect-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Page break hints */
+  section        { break-inside: avoid; }
+  .break-before  { break-before: page; }
+  table          { break-inside: auto; }
+  tr             { break-inside: avoid; }
+
+  /* Links */
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
 }

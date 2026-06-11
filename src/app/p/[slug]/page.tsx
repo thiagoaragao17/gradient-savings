@@ -52,13 +52,18 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
     prospect.interchange_data &&
     Object.values(prospect.interchange_data).some(n => n && (n as CardNetworkData).rows?.length > 0)
 
-  const repInitials = prospect.rep_name
-    ? prospect.rep_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
-    : null
-
   return (
     <div className="min-h-screen bg-white">
       <ViewTracker prospectId={prospect.id} />
+
+      {/* Print-only header */}
+      <div className="hidden print:flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <Image src="/logo-header.svg" alt="Gradient MSP" width={140} height={35} />
+        <div className="text-right">
+          <p className="font-bold text-gray-900 uppercase tracking-wide">{prospect.company_name}</p>
+          <p className="text-xs text-gray-400">Payment Analysis · {fmtDate(prospect.expiry_date)}</p>
+        </div>
+      </div>
 
       {isExpired && (
         <div className="bg-blush-100 border-b border-blush-200 text-blush-600 text-sm text-center py-2 px-4 no-print">
@@ -86,7 +91,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
 
         {/* ── Two-column section ─────────────────────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="prospect-columns flex flex-col lg:flex-row gap-8 items-stretch">
 
           {/* Left column */}
           <div className="flex-1 min-w-0 space-y-5">
@@ -184,38 +189,11 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
               </div>
             </section>
 
-            {/* 3. Rep / POC */}
-            {prospect.rep_name && (
-              <section className="border border-gray-100 rounded-2xl p-6 flex items-center gap-5">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
-                  style={{ background: 'linear-gradient(135deg, #4e7f7b, #bba4e3)' }}
-                >
-                  {repInitials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900">{prospect.rep_name}</p>
-                  <p className="text-xs text-brand-500 mt-0.5">Gradient Payments</p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5">
-                    {prospect.rep_email && (
-                      <a href={`mailto:${prospect.rep_email}`} className="text-xs text-gray-500 hover:text-brand-600 transition-colors">
-                        {prospect.rep_email}
-                      </a>
-                    )}
-                    {prospect.rep_phone && (
-                      <a href={`tel:${prospect.rep_phone}`} className="text-xs text-gray-500 hover:text-brand-600 transition-colors">
-                        {prospect.rep_phone}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </section>
-            )}
 
           </div>
 
           {/* Right column — sticky savings panel */}
-          <div className="w-full lg:w-80 xl:w-96 shrink-0">
+          <div className="prospect-sidebar w-full lg:w-80 xl:w-96 shrink-0 flex flex-col">
             <SavingsPanel prospect={prospect} />
           </div>
 
@@ -223,7 +201,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
 
         {/* ── 4. Full-width interchange breakdown ────────────────────────────── */}
         {hasInterchange && (
-          <section>
+          <section className="break-before">
             <h2 className="text-base font-semibold text-gray-900 mb-5">Interchange Cost Breakdown</h2>
             <div className="space-y-5">
               {networks.map(({ key, label }) => {

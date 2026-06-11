@@ -390,6 +390,14 @@ export default function ProspectForm({ prospect, action }: Props) {
               placeholder="jane@yourcompany.com"
             />
           </Field>
+          <Field label="Photo URL or path" hint="e.g. /avatars/colin-knox.png">
+            <input
+              name="rep_photo"
+              defaultValue={prospect?.rep_photo ?? ''}
+              className={input}
+              placeholder="/avatars/colin-knox.png"
+            />
+          </Field>
         </div>
       </FormSection>
 

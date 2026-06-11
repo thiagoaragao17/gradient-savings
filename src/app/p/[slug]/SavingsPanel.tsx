@@ -95,8 +95,8 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
 
   return (
     <div
-      className="sticky top-[65px] rounded-2xl overflow-hidden shadow-2xl text-white"
-      style={{ background: 'linear-gradient(160deg, #3b1fa8 0%, #5b21b6 45%, #4c1d95 100%)' }}
+      className="sticky top-[65px] rounded-2xl overflow-hidden shadow-2xl text-white flex flex-col flex-1"
+      style={{ background: 'linear-gradient(160deg, #7FB6B2 0%, #4E8E8A 45%, #3d7470 100%)' }}
     >
       <style>{BOUNCE_STYLE}</style>
 
@@ -108,11 +108,11 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
         <p
           key={feeSaver ? 'on' : 'off'}
           className={`text-5xl font-extrabold tracking-tight ${bouncing ? 'savings-bounce' : ''}`}
-          style={{ color: '#86efac', display: 'inline-block' }}
+          style={{ color: '#ffffff', display: 'inline-block' }}
         >
           ${fmt(displayAnnual)}
         </p>
-        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(134,239,172,0.15)', color: '#86efac' }}>
+        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff' }}>
           {savingsPct}% cost reduction
         </div>
       </div>
@@ -126,7 +126,10 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
           <span className="w-24 text-center text-xs font-semibold text-white leading-tight">
             {prospect.current_provider}
           </span>
-          <span className="w-24 flex justify-center"><Image src="/logo-payments-white.svg" alt="Gradient Payments" width={80} height={14} /></span>
+          <span className="w-24 flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold text-white leading-tight">Gradient MSP</span>
+            <Image src="/logo-payments-white.svg" alt="Gradient Payments" width={80} height={14} />
+          </span>
         </div>
 
         <div className="flex items-end justify-center gap-6">
@@ -146,7 +149,7 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
               className="flex flex-col items-center justify-center gap-0.5 text-center px-1"
               style={{
                 height: savingsH,
-                background: 'linear-gradient(to bottom, #86efac, #4ade80)',
+                background: 'linear-gradient(to bottom, #b0ffc8, #99f2b4)',
                 flexShrink: 0,
                 transition: 'height 500ms cubic-bezier(.4,0,.2,1)',
               }}
@@ -195,8 +198,8 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
 
       <div className="mx-5 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' }} />
 
-      {/* Fee Saver toggle */}
-      <div className="px-6 py-5">
+      {/* Fee Saver toggle — hidden on print */}
+      <div className="print-hide px-6 py-5">
         <button onClick={handleToggle} className="w-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 text-left">
             <div
@@ -231,6 +234,46 @@ export default function SavingsPanel({ prospect }: { prospect: Prospect }) {
           </p>
         )}
       </div>
+
+      {/* Rep / POC */}
+      {prospect.rep_name && (
+        <>
+          <div className="mt-auto mx-5 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' }} />
+          <p className="px-6 pt-4 text-xs text-white/50 font-medium">Questions? I&apos;m here to help</p>
+          <div className="px-6 py-4 flex items-center gap-4">
+            {prospect.rep_photo ? (
+              <Image
+                src={prospect.rep_photo}
+                alt={prospect.rep_name}
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
+                style={{ background: 'linear-gradient(135deg, rgba(78,127,123,0.8), rgba(187,164,227,0.8))' }}
+              >
+                {prospect.rep_name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white">{prospect.rep_name}</p>
+              <p className="text-xs text-white/50 mt-0.5">Gradient Payments</p>
+              {prospect.rep_email && (
+                <a href={`mailto:${prospect.rep_email}`} className="text-xs text-white/70 hover:text-white transition-colors mt-1 block">
+                  {prospect.rep_email}
+                </a>
+              )}
+              {prospect.rep_phone && (
+                <a href={`tel:${prospect.rep_phone}`} className="text-xs text-white/70 hover:text-white transition-colors block">
+                  {prospect.rep_phone}
+                </a>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
