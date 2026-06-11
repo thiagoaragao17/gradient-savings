@@ -5,38 +5,165 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { randomBytes } from 'crypto'
+import bcrypt from 'bcryptjs'
 import type { Prospect } from './types'
 
 function generateToken(): string {
-  return randomBytes(3).toString('hex') // 6 lowercase hex chars e.g. "a3k9m2"
+  return randomBytes(3).toString('hex')
+}
+
+function generateSessionToken(): string {
+  return randomBytes(32).toString('hex')
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
-export async function login(
-  _prev: { error: string } | null,
-  formData: FormData
-): Promise<{ error: string } | null> {
-  const password = formData.get('password') as string
-  const adminPassword = process.env.ADMIN_PASSWORD
-
-  if (!adminPassword) return { error: 'ADMIN_PASSWORD env var not set.' }
-  if (password !== adminPassword) return { error: 'Incorrect password.' }
-
+async function setSessionCookie(token: string) {
   const cookieStore = await cookies()
-  cookieStore.set('admin_session', password, {
+  cookieStore.set('admin_session', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   })
-  redirect('/admin')
+}
+
+export async function login(
+  _prev: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+
+  // Try DB users first
+  const { data: user } = await db
+    .from('admin_users')
+    .select('id, password_hash, is_active')
+    .eq('email', email.toLowerCase().trim())
+    .single()
+
+  if (user && user.is_active) {
+    const valid = await bcrypt.compare(password, user.password_hash)
+    if (!valid) return { error: 'Incorrect email or password.' }
+    const token = generateSessionToken()
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    await db.from('admin_sessions').insert({ token, user_id: user.id, expires_at: expires })
+    await setSessionCookie(token)
+    redirect('/admin')
+  }
+
+  // Fallback: legacy ADMIN_PASSWORD (email field ignored, treated as password-only)
+  const adminPassword = process.env.ADMIN_PASSWORD
+  if (adminPassword && password === adminPassword) {
+    const token = `legacy:${password}`
+    await setSessionCookie(token)
+    redirect('/admin')
+  }
+
+  return { error: 'Incorrect email or password.' }
 }
 
 export async function logout() {
   const cookieStore = await cookies()
+  const token = cookieStore.get('admin_session')?.value
+  if (token && !token.startsWith('legacy:')) {
+    await db.from('admin_sessions').delete().eq('token', token)
+  }
   cookieStore.delete('admin_session')
   redirect('/admin/login')
+}
+
+export async function validateSession(): Promise<boolean> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('admin_session')?.value
+  if (!token) return false
+
+  // Legacy password-based session
+  if (token.startsWith('legacy:')) {
+    const password = token.slice(7)
+    return password === process.env.ADMIN_PASSWORD
+  }
+
+  // DB session
+  const { data } = await db
+    .from('admin_sessions')
+    .select('expires_at, admin_users(is_active)')
+    .eq('token', token)
+    .single()
+
+  if (!data) return false
+  if (new Date(data.expires_at) < new Date()) return false
+  const users = data.admin_users as unknown as { is_active: boolean } | null
+  return users?.is_active !== false
+}
+
+// ── User management ───────────────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  is_active: boolean
+  created_at: string
+}
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  const { data } = await db
+    .from('admin_users')
+    .select('id, name, email, role, is_active, created_at')
+    .order('created_at', { ascending: true })
+  return (data ?? []) as AdminUser[]
+}
+
+export async function createAdminUser(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const name = (formData.get('name') as string).trim()
+  const email = (formData.get('email') as string).trim().toLowerCase()
+  const password = (formData.get('password') as string)
+  const role = (formData.get('role') as string) || 'admin'
+
+  if (!name || !email || !password) return { error: 'All fields are required.' }
+  if (password.length < 8) return { error: 'Password must be at least 8 characters.' }
+
+  const password_hash = await bcrypt.hash(password, 12)
+  const { error } = await db.from('admin_users').insert({ name, email, password_hash, role, is_active: true })
+
+  if (error) {
+    if (error.code === '23505') return { error: 'An account with that email already exists.' }
+    return { error: error.message }
+  }
+
+  revalidatePath('/admin/settings')
+  return { success: true }
+}
+
+export async function deleteAdminUser(id: string): Promise<void> {
+  await db.from('admin_sessions').delete().eq('user_id', id)
+  await db.from('admin_users').delete().eq('id', id)
+  revalidatePath('/admin/settings')
+}
+
+export async function toggleAdminUser(id: string, is_active: boolean): Promise<void> {
+  await db.from('admin_users').update({ is_active }).eq('id', id)
+  if (!is_active) await db.from('admin_sessions').delete().eq('user_id', id)
+  revalidatePath('/admin/settings')
+}
+
+export async function changeAdminPassword(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const id = formData.get('user_id') as string
+  const password = formData.get('new_password') as string
+  if (!password || password.length < 8) return { error: 'Password must be at least 8 characters.' }
+  const password_hash = await bcrypt.hash(password, 12)
+  await db.from('admin_users').update({ password_hash }).eq('id', id)
+  await db.from('admin_sessions').delete().eq('user_id', id)
+  revalidatePath('/admin/settings')
+  return { success: true }
 }
 
 // ── Form parsing ──────────────────────────────────────────────────────────────

@@ -22,18 +22,28 @@ export default function LoginPage() {
 
         <div className="bg-white rounded-2xl border border-brand-100 shadow-sm p-8">
           <h1 className="text-xl font-semibold text-brand-900 mb-1">Admin Access</h1>
-          <p className="text-sm text-brand-500 mb-6">Enter your password to continue.</p>
+          <p className="text-sm text-brand-500 mb-6">Sign in to your account.</p>
 
           <form action={formAction} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-brand-800 mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-brand-800 mb-1.5">Email</label>
+              <input
+                type="email"
+                name="email"
+                required
+                autoFocus
+                autoComplete="email"
+                className="w-full px-3.5 py-2.5 rounded-lg border border-brand-200 text-brand-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+                placeholder="you@meetgradient.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-brand-800 mb-1.5">Password</label>
               <input
                 type="password"
                 name="password"
                 required
-                autoFocus
+                autoComplete="current-password"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-brand-200 text-brand-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
                 placeholder="••••••••"
               />

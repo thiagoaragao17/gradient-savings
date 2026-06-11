@@ -50,6 +50,26 @@ create index if not exists idx_prospects_slug       on prospects(slug);
 create index if not exists idx_prospects_status     on prospects(status);
 create index if not exists idx_views_prospect_id    on prospect_views(prospect_id);
 
+create table if not exists admin_users (
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  email         text unique not null,
+  password_hash text not null,
+  role          text not null default 'admin' check (role in ('admin', 'viewer')),
+  is_active     boolean not null default true,
+  created_at    timestamptz not null default now()
+);
+
+create table if not exists admin_sessions (
+  token       text primary key,
+  user_id     uuid not null references admin_users(id) on delete cascade,
+  expires_at  timestamptz not null,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists idx_sessions_user_id on admin_sessions(user_id);
+create index if not exists idx_sessions_expires  on admin_sessions(expires_at);
+
 create table if not exists app_settings (
   id                    integer primary key default 1,
   rep_name              text not null default 'Colin Knox',
