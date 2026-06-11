@@ -179,11 +179,13 @@ function extract(obj: Record<string, unknown>): ParsedProspect {
 function findComparison(data: unknown): Record<string, unknown> | null {
   if (!data || typeof data !== 'object') return null
   const o = data as Record<string, unknown>
+  const props = o?.props as Record<string, unknown> | undefined
+  const pageProps = props?.pageProps as Record<string, unknown> | undefined
   const candidates = [
-    o?.props?.pageProps?.comparison,
-    o?.props?.pageProps?.data,
-    o?.props?.pageProps?.comparisonData,
-    o?.props?.pageProps,
+    pageProps?.comparison,
+    pageProps?.data,
+    pageProps?.comparisonData,
+    pageProps,
     dig(o, 'comparison'),
     dig(o, 'comparisonData'),
     dig(o, 'pageData'),
