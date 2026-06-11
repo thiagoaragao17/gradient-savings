@@ -179,7 +179,6 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
                 <div className="px-6 py-4">
                   <p className="text-sm font-semibold text-gray-900">No Extra Fees</p>
                   <p className="text-xs text-gray-400 mt-0.5">No minimums, PCI, or statement fees</p>
-                  <p className="text-sm font-bold text-brand-600 mt-1">None</p>
                 </div>
               </div>
             </section>
