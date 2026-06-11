@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, BarChart3, Settings } from 'lucide-react'
+import { FileText, BarChart3, Activity, Settings } from 'lucide-react'
 
 const TABS = [
   { href: '/admin',            label: 'Quotes',    icon: FileText  },
   { href: '/admin/analytics',  label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/activity',   label: 'Activity',  icon: Activity  },
   { href: '/admin/settings',   label: 'Settings',  icon: Settings  },
 ]
 

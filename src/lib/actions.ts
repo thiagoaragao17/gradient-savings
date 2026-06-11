@@ -97,6 +97,63 @@ export async function validateSession(): Promise<boolean> {
   return users?.is_active !== false
 }
 
+// ── Audit log ─────────────────────────────────────────────────────────────────
+
+type AuditAction =
+  | 'quote_created'
+  | 'quote_deleted'
+  | 'quote_duplicated'
+  | 'prospect_viewed'
+  | 'user_created'
+  | 'user_deleted'
+  | 'user_deactivated'
+  | 'user_activated'
+
+async function getActorName(): Promise<string> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('admin_session')?.value
+    if (!token) return 'System'
+    if (token.startsWith('legacy:')) return 'Admin'
+    const { data } = await db
+      .from('admin_sessions')
+      .select('admin_users(name)')
+      .eq('token', token)
+      .single()
+    const user = data?.admin_users as unknown as { name: string } | null
+    return user?.name ?? 'Admin'
+  } catch {
+    return 'System'
+  }
+}
+
+async function auditLog(
+  action: AuditAction,
+  target_label: string,
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  const actor_name = await getActorName()
+  await db.from('audit_log').insert({ actor_name, action, target_label, metadata: metadata ?? {} })
+}
+
+export interface AuditEntry {
+  id: string
+  actor_name: string
+  action: AuditAction
+  target_label: string
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export async function getAuditLog(limit = 100): Promise<AuditEntry[]> {
+  const { data } = await db
+    .from('audit_log')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return (data ?? []) as AuditEntry[]
+}
+
 // ── User management ───────────────────────────────────────────────────────────
 
 export interface AdminUser {
@@ -136,19 +193,24 @@ export async function createAdminUser(
     return { error: error.message }
   }
 
+  await auditLog('user_created', name, { email, role })
   revalidatePath('/admin/settings')
   return { success: true }
 }
 
 export async function deleteAdminUser(id: string): Promise<void> {
+  const { data } = await db.from('admin_users').select('name, email').eq('id', id).single()
   await db.from('admin_sessions').delete().eq('user_id', id)
   await db.from('admin_users').delete().eq('id', id)
+  if (data) await auditLog('user_deleted', data.name, { email: data.email })
   revalidatePath('/admin/settings')
 }
 
 export async function toggleAdminUser(id: string, is_active: boolean): Promise<void> {
+  const { data } = await db.from('admin_users').select('name').eq('id', id).single()
   await db.from('admin_users').update({ is_active }).eq('id', id)
   if (!is_active) await db.from('admin_sessions').delete().eq('user_id', id)
+  if (data) await auditLog(is_active ? 'user_activated' : 'user_deactivated', data.name)
   revalidatePath('/admin/settings')
 }
 
@@ -266,6 +328,7 @@ export async function createProspect(
 
   const { error } = await db.from('prospects').insert(payload)
   if (error) return { error: error.message }
+  await auditLog('quote_created', payload.company_name, { slug: payload.slug })
   revalidatePath('/admin')
   redirect('/admin')
 }
@@ -293,7 +356,9 @@ export async function updateLeadStage(id: string, lead_stage: Prospect['lead_sta
 }
 
 export async function deleteProspect(id: string) {
+  const { data } = await db.from('prospects').select('company_name').eq('id', id).single()
   await db.from('prospects').delete().eq('id', id)
+  if (data) await auditLog('quote_deleted', data.company_name)
   revalidatePath('/admin')
 }
 
@@ -327,6 +392,7 @@ export async function duplicateProspect(id: string) {
     .single()
 
   if (error || !newProspect) return
+  await auditLog('quote_duplicated', original.company_name, { new_slug: slug })
   revalidatePath('/admin')
   redirect(`/admin/${newProspect.id}/edit`)
 }
@@ -336,6 +402,8 @@ export async function duplicateProspect(id: string) {
 export async function logProspectView(prospectId: string) {
   const now = new Date().toISOString()
   await db.from('prospect_views').insert({ prospect_id: prospectId })
+  const { data: prospect } = await db.from('prospects').select('company_name').eq('id', prospectId).single()
+  if (prospect) await db.from('audit_log').insert({ actor_name: 'Prospect', action: 'prospect_viewed', target_label: prospect.company_name, metadata: {} })
 
   const { data } = await db
     .from('prospects')

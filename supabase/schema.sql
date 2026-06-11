@@ -50,6 +50,17 @@ create index if not exists idx_prospects_slug       on prospects(slug);
 create index if not exists idx_prospects_status     on prospects(status);
 create index if not exists idx_views_prospect_id    on prospect_views(prospect_id);
 
+create table if not exists audit_log (
+  id           uuid primary key default gen_random_uuid(),
+  actor_name   text not null,
+  action       text not null,
+  target_label text not null,
+  metadata     jsonb not null default '{}',
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists idx_audit_log_created_at on audit_log(created_at desc);
+
 create table if not exists admin_users (
   id            uuid primary key default gen_random_uuid(),
   name          text not null,
