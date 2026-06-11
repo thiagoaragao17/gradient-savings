@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   const [settings, users] = await Promise.all([getSettings(), getAdminUsers()])
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       <UserManagement users={users} />
       <SettingsForm settings={settings} />
       <DangerZone />
