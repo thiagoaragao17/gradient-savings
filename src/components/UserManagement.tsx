@@ -1,9 +1,22 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
+import { useActionState, useState, useTransition, useRef } from 'react'
 import { createAdminUser, deleteAdminUser, toggleAdminUser, changeAdminPassword } from '@/lib/actions'
 import type { AdminUser } from '@/lib/actions'
-import { UserPlus, Trash2, KeyRound, ShieldCheck, ShieldOff, Users } from 'lucide-react'
+import { UserPlus, Trash2, KeyRound, ShieldCheck, ShieldOff, Users, RefreshCw, Eye, EyeOff, Copy, Check } from 'lucide-react'
+
+function generatePassword(): string {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const lower = 'abcdefghjkmnpqrstuvwxyz'
+  const digits = '23456789'
+  const symbols = '!@#$%&*'
+  const all = upper + lower + digits + symbols
+  const rand = (s: string) => s[Math.floor(Math.random() * s.length)]
+  // Guarantee at least one of each category
+  const required = [rand(upper), rand(lower), rand(digits), rand(symbols)]
+  const rest = Array.from({ length: 8 }, () => rand(all))
+  return [...required, ...rest].sort(() => Math.random() - 0.5).join('')
+}
 
 export default function UserManagement({ users }: { users: AdminUser[] }) {
   const [showAdd, setShowAdd] = useState(false)
@@ -57,6 +70,23 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
     },
     null
   )
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const passwordRef = useRef<HTMLInputElement>(null)
+
+  function handleGenerate() {
+    const p = generatePassword()
+    setPassword(p)
+    setShowPassword(true)
+  }
+
+  function handleCopy() {
+    if (!password) return
+    navigator.clipboard.writeText(password)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <form action={formAction} className="bg-brand-50 rounded-lg p-4 mb-4 space-y-3">
@@ -67,7 +97,45 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input name="name" required placeholder="Full name" className={input} />
         <input name="email" type="email" required placeholder="email@company.com" className={input} />
-        <input name="password" type="password" required placeholder="Password (min 8 chars)" className={input} />
+        <div className="relative flex items-center sm:col-span-2">
+          <input
+            ref={passwordRef}
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            required
+            placeholder="Password (min 8 chars)"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className={`${input} pr-28 font-mono`}
+          />
+          <div className="absolute right-1 flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              title="Generate password"
+              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors"
+            >
+              <RefreshCw size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              title={showPassword ? 'Hide' : 'Show'}
+              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors"
+            >
+              {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+            </button>
+            <button
+              type="button"
+              onClick={handleCopy}
+              title="Copy password"
+              disabled={!password}
+              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors disabled:opacity-30"
+            >
+              {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
+            </button>
+          </div>
+        </div>
         <select name="role" className={input}>
           <option value="admin">Admin</option>
           <option value="viewer">Viewer (read-only)</option>
