@@ -1,5 +1,6 @@
 import { getProspects } from '@/lib/actions'
 import AdminNav from '@/components/AdminNav'
+import AdminDashboard from '@/components/AdminDashboard'
 import ViewStatusBadge from '@/components/ViewStatusBadge'
 import LeadStageDropdown from '@/components/LeadStageDropdown'
 import CopyLinkButton from '@/components/CopyLinkButton'
@@ -7,7 +8,7 @@ import DeleteButton from '@/components/DeleteButton'
 import DuplicateButton from '@/components/DuplicateButton'
 import NewProspectButton from '@/components/NewProspectButton'
 import Link from 'next/link'
-import { Eye, ExternalLink, Pencil, BarChart3, Building2, DollarSign } from 'lucide-react'
+import { Eye, ExternalLink, Pencil, Building2 } from 'lucide-react'
 import Tooltip from '@/components/Tooltip'
 import type { Prospect } from '@/lib/types'
 
@@ -16,32 +17,12 @@ export const dynamic = 'force-dynamic'
 export default async function AdminPage() {
   const prospects = await getProspects()
 
-  const totalPipeline = prospects.reduce((s, p) => s + p.annual_savings, 0)
-  const unseenCount = prospects.filter(p => p.view_count === 0).length
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f7f6f3' }}>
       <AdminNav />
 
       <main className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            icon={<Building2 size={18} className="text-brand-400" />}
-            label="Total Prospects"
-            value={prospects.length.toString()}
-          />
-          <StatCard
-            icon={<DollarSign size={18} className="text-brand-400" />}
-            label="Annual Savings Pipeline"
-            value={`$${Math.round(totalPipeline).toLocaleString('en-US')}`}
-          />
-          <StatCard
-            icon={<BarChart3 size={18} className="text-brand-400" />}
-            label="Not Yet Opened"
-            value={unseenCount.toString()}
-          />
-        </div>
+        <AdminDashboard prospects={prospects} />
 
         {/* Table */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
@@ -91,27 +72,6 @@ export default async function AdminPage() {
   )
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center gap-4">
-      <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs text-gray-500 font-medium">{label}</p>
-        <p className="text-2xl font-bold text-brand-900 leading-tight">{value}</p>
-      </div>
-    </div>
-  )
-}
 
 function ProspectRow({ prospect: p }: { prospect: Prospect }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
