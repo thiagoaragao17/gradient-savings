@@ -225,3 +225,66 @@ export async function logProspectView(prospectId: string) {
     })
     .eq('id', prospectId)
 }
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+export interface AppSettings {
+  rep_name: string
+  rep_email: string
+  default_expiry_days: number
+  signup_url_template: string | null
+}
+
+export async function getSettings(): Promise<AppSettings> {
+  const { data } = await db.from('app_settings').select('*').eq('id', 1).single()
+  return (data as AppSettings) ?? {
+    rep_name: 'Colin Knox',
+    rep_email: 'colin.knox@meetgradient.com',
+    default_expiry_days: 90,
+    signup_url_template: null,
+  }
+}
+
+export async function saveSettings(
+  _prev: { error?: string; success?: boolean } | null,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const settings = {
+    rep_name: (formData.get('rep_name') as string).trim(),
+    rep_email: (formData.get('rep_email') as string).trim(),
+    default_expiry_days: Number(formData.get('default_expiry_days')) || 90,
+    signup_url_template: (formData.get('signup_url_template') as string)?.trim() || null,
+  }
+
+  const { error } = await db
+    .from('app_settings')
+    .upsert({ id: 1, ...settings }, { onConflict: 'id' })
+
+  if (error) return { error: error.message }
+  revalidatePath('/admin/settings')
+  return { success: true }
+}
+
+export async function bulkDeleteExpired(): Promise<{ deleted: number }> {
+  const { data, error } = await db
+    .from('prospects')
+    .delete()
+    .lt('expiry_date', new Date().toISOString().slice(0, 10))
+    .select('id')
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin')
+  revalidatePath('/admin/analytics')
+  return { deleted: data?.length ?? 0 }
+}
+
+export async function bulkDeleteByStatus(status: string): Promise<{ deleted: number }> {
+  const { data, error } = await db
+    .from('prospects')
+    .delete()
+    .eq('status', status)
+    .select('id')
+  if (error) throw new Error(error.message)
+  revalidatePath('/admin')
+  revalidatePath('/admin/analytics')
+  return { deleted: data?.length ?? 0 }
+}

@@ -1,6 +1,4 @@
 import { getProspects } from '@/lib/actions'
-import AdminNav from '@/components/AdminNav'
-import AdminDashboard from '@/components/AdminDashboard'
 import ViewStatusBadge from '@/components/ViewStatusBadge'
 import LeadStageDropdown from '@/components/LeadStageDropdown'
 import CopyLinkButton from '@/components/CopyLinkButton'
@@ -14,83 +12,67 @@ import type { Prospect } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminPage() {
+export default async function QuotesPage() {
   const prospects = await getProspects()
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f7f6f3' }}>
-      <AdminNav />
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 className="font-semibold text-brand-900">Quotes</h2>
+        <NewProspectButton />
+      </div>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <AdminDashboard prospects={prospects} />
-
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-brand-900">Prospects</h2>
-            <NewProspectButton />
+      {prospects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center mb-3">
+            <Building2 size={22} className="text-brand-300" />
           </div>
-
-          {prospects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center mb-3">
-                <Building2 size={22} className="text-brand-300" />
-              </div>
-              <p className="text-brand-600 font-medium mb-1">No prospects yet</p>
-              <p className="text-brand-400 text-sm mb-4">Create your first prospect to get started.</p>
-              <NewProspectButton />
-            </div>
-          ) : (
-            <div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
-                    <th className="text-left px-6 py-3 font-semibold">Quote ID</th>
-                    <th className="text-left px-6 py-3 font-semibold">Company</th>
-                    <th className="text-left px-6 py-3 font-semibold">Created</th>
-                    <th className="text-left px-6 py-3 font-semibold">Provider</th>
-                    <th className="text-right px-6 py-3 font-semibold">Annual Savings</th>
-                    <th className="text-center px-6 py-3 font-semibold">Views</th>
-                    <th className="text-left px-6 py-3 font-semibold">Last Seen</th>
-                    <th className="text-left px-6 py-3 font-semibold">Expires</th>
-                    <th className="text-left px-6 py-3 font-semibold">Status</th>
-                    <th className="text-left px-6 py-3 font-semibold">Lead Stage</th>
-                    <th className="px-6 py-3" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {prospects.map(p => (
-                    <ProspectRow key={p.id} prospect={p} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <p className="text-brand-600 font-medium mb-1">No quotes yet</p>
+          <p className="text-brand-400 text-sm mb-4">Create your first quote to get started.</p>
+          <NewProspectButton />
         </div>
-      </main>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
+                <th className="text-left px-6 py-3 font-semibold">Quote ID</th>
+                <th className="text-left px-6 py-3 font-semibold">Company</th>
+                <th className="text-left px-6 py-3 font-semibold">Created</th>
+                <th className="text-left px-6 py-3 font-semibold">Provider</th>
+                <th className="text-right px-6 py-3 font-semibold">Annual Savings</th>
+                <th className="text-center px-6 py-3 font-semibold">Views</th>
+                <th className="text-left px-6 py-3 font-semibold">Last Seen</th>
+                <th className="text-left px-6 py-3 font-semibold">Expires</th>
+                <th className="text-left px-6 py-3 font-semibold">Status</th>
+                <th className="text-left px-6 py-3 font-semibold">Lead Stage</th>
+                <th className="px-6 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {prospects.map(p => (
+                <ProspectRow key={p.id} prospect={p} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
-
 
 function ProspectRow({ prospect: p }: { prospect: Prospect }) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'
   const prospectUrl = `${baseUrl}/p/${p.slug}`
 
   const created = new Date(p.created_at).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+    month: 'short', day: 'numeric', year: 'numeric',
   })
-
   const lastSeen = p.last_viewed_at
     ? new Date(p.last_viewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '—'
-
   const expiry = new Date(p.expiry_date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+    month: 'short', day: 'numeric', year: 'numeric',
   })
   const isExpired = new Date(p.expiry_date) < new Date()
 
@@ -120,30 +102,20 @@ function ProspectRow({ prospect: p }: { prospect: Prospect }) {
       <td className="px-6 py-4 text-xs">
         <span className={isExpired ? 'text-blush-400' : 'text-gray-400'}>{expiry}</span>
       </td>
-      <td className="px-6 py-4">
-        <ViewStatusBadge prospect={p} />
-      </td>
-      <td className="px-6 py-4">
-        <LeadStageDropdown prospect={p} />
-      </td>
+      <td className="px-6 py-4"><ViewStatusBadge prospect={p} /></td>
+      <td className="px-6 py-4"><LeadStageDropdown prospect={p} /></td>
       <td className="px-6 py-4">
         <div className="flex items-center gap-1 justify-end">
           <CopyLinkButton url={prospectUrl} />
           <Tooltip label="Preview prospect page">
-            <a
-              href={prospectUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors"
-            >
+            <a href={prospectUrl} target="_blank" rel="noopener noreferrer"
+              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors">
               <ExternalLink size={15} />
             </a>
           </Tooltip>
           <Tooltip label="Edit prospect">
-            <Link
-              href={`/admin/${p.id}/edit`}
-              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors"
-            >
+            <Link href={`/admin/${p.id}/edit`}
+              className="p-1.5 text-brand-400 hover:text-brand-600 transition-colors">
               <Pencil size={15} />
             </Link>
           </Tooltip>

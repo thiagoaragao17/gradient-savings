@@ -49,3 +49,13 @@ create table if not exists prospect_views (
 create index if not exists idx_prospects_slug       on prospects(slug);
 create index if not exists idx_prospects_status     on prospects(status);
 create index if not exists idx_views_prospect_id    on prospect_views(prospect_id);
+
+create table if not exists app_settings (
+  id                    integer primary key default 1,
+  rep_name              text not null default 'Colin Knox',
+  rep_email             text not null default 'colin.knox@meetgradient.com',
+  default_expiry_days   integer not null default 90,
+  signup_url_template   text,
+  constraint single_row check (id = 1)
+);
+insert into app_settings (id) values (1) on conflict do nothing;
