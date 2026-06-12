@@ -1,4 +1,4 @@
-import { HELCIM_TIERS, HELCIM_NOTES } from '@/lib/helcim-tiers'
+import { HELCIM_TIERS, ACH_RATES, FEE_SAVER, HELCIM_NOTES } from '@/lib/helcim-tiers'
 import { Info } from 'lucide-react'
 
 export default function TiersPage() {
@@ -53,47 +53,53 @@ export default function TiersPage() {
         </div>
       </section>
 
-      {/* Debit note */}
+      {/* ACH */}
       <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Debit Cards</h2>
+          <h2 className="font-semibold text-gray-900">ACH Bank Payments</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Flat rate — no volume tiers.</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">Tier</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Monthly Volume</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">In-Person</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Keyed / Online</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {[
-                { tier: 1, range: '$0 – $50k',     inPerson: '0.15% + 8¢', keyed: '0.20% + 25¢' },
-                { tier: 2, range: '$50k – $100k',  inPerson: '0.12% + 7¢', keyed: '0.15% + 20¢' },
-                { tier: 3, range: '$100k – $500k', inPerson: '0.10% + 7¢', keyed: '0.12% + 20¢' },
-                { tier: 4, range: '$500k – $1M',   inPerson: '0.08% + 6¢', keyed: '0.10% + 15¢' },
-                { tier: 5, range: '$1M+',          inPerson: '0.05% + 6¢', keyed: '0.08% + 15¢' },
-              ].map((t) => (
-                <tr key={t.tier} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-100 text-brand-700 text-xs font-bold">
-                      {t.tier}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">{t.range}</td>
-                  <td className="px-6 py-4 text-right font-mono text-gray-800">{t.inPerson}</td>
-                  <td className="px-6 py-4 text-right font-mono text-gray-800">{t.keyed}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="divide-y divide-gray-50">
+          <div className="px-6 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900">{ACH_RATES.standard.description}</p>
+            </div>
+            <p className="text-sm font-mono font-bold text-gray-800 shrink-0">
+              {ACH_RATES.standard.rate} + {ACH_RATES.standard.perTxn}
+              <span className="ml-2 text-xs font-normal text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                capped at {ACH_RATES.standard.cap}
+              </span>
+            </p>
+          </div>
+          <div className="px-6 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900">{ACH_RATES.large.description}</p>
+            </div>
+            <p className="text-sm font-mono font-bold text-gray-800 shrink-0">{ACH_RATES.large.rate}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Fee Saver / Surcharging */}
+      <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-900">Surcharging (Fee Saver)</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Pass credit card fees to customers. Compliant surcharging on eligible accounts.</p>
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-gray-100">
+          <div className="px-6 py-5 text-center">
+            <p className="text-xs text-gray-400 mb-2">You pay</p>
+            <p className="text-4xl font-extrabold text-brand-600">{FEE_SAVER.merchantRate}</p>
+            <p className="text-xs text-gray-400 mt-1">On credit card transactions</p>
+          </div>
+          <div className="px-6 py-5 text-center">
+            <p className="text-xs text-gray-400 mb-2">Your customers pay</p>
+            <p className="text-4xl font-extrabold text-gray-800">{FEE_SAVER.customerRateInPerson}</p>
+            <p className="text-xs text-gray-400 mt-1">In-person &amp; online transactions</p>
+          </div>
         </div>
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-          <p className="text-xs text-gray-400">
-            Debit interchange is regulated (Durbin Amendment) and typically <strong className="text-gray-600">much lower</strong> than credit interchange. With Fee Saver surcharging, debit is the only card type that retains a cost.
-          </p>
+          <p className="text-xs text-gray-400">*{FEE_SAVER.note}</p>
         </div>
       </section>
 
