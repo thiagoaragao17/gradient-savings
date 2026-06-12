@@ -1,4 +1,5 @@
 import { getProspectBySlug } from '@/lib/actions'
+import { HELCIM_TIERS } from '@/lib/helcim-tiers'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import ViewTracker from './ViewTracker'
@@ -40,13 +41,7 @@ export default async function ProspectPage({ params }: { params: Promise<{ slug:
     { key: 'pin_debit',  label: 'US Common PIN Debit' },
   ] as const
 
-  const tiers = [
-    { tier: 1, range: '$0 – $50k',     inPerson: '0.40% + 8¢',  keyed: '0.50% + 25¢' },
-    { tier: 2, range: '$50k – $100k',  inPerson: '0.35% + 7¢',  keyed: '0.45% + 20¢' },
-    { tier: 3, range: '$100k – $500k', inPerson: '0.25% + 7¢',  keyed: '0.35% + 20¢' },
-    { tier: 4, range: '$500k – $1m',   inPerson: '0.20% + 6¢',  keyed: '0.25% + 15¢' },
-    { tier: 5, range: '$1m+',          inPerson: '0.15% + 6¢',  keyed: '0.15% + 15¢' },
-  ]
+  const tiers = HELCIM_TIERS.map(t => ({ tier: t.tier, range: t.volumeRange, inPerson: t.inPerson, keyed: t.keyed }))
 
   const hasInterchange =
     prospect.interchange_data &&
