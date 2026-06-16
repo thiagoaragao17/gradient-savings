@@ -14,8 +14,8 @@ const CREDIT_TIERS: HelcimTier[] = [
   { tier: 2, volumeRange: '$50K – $100K',  volumeMin: 50000,   volumeMax: 99999,    inPerson: '0.35% + 7¢',  keyed: '0.45% + 20¢' },
   { tier: 3, volumeRange: '$100K – $500K', volumeMin: 100000,  volumeMax: 499999,   inPerson: '0.25% + 7¢',  keyed: '0.35% + 20¢' },
   { tier: 4, volumeRange: '$500K – $1M',   volumeMin: 500000,  volumeMax: 999999,   inPerson: '0.20% + 6¢',  keyed: '0.25% + 15¢' },
-  { tier: 5, volumeRange: '$1M – $5M',     volumeMin: 1000000, volumeMax: 4999999,  inPerson: '0.15% + 6¢',  keyed: '0.15% + 15¢' },
-  { tier: 6, volumeRange: '$5M+',          volumeMin: 5000000, volumeMax: Infinity, inPerson: 'Custom',       keyed: 'Custom'       },
+  { tier: 5, volumeRange: '$1M – $5M',     volumeMin: 1000000, volumeMax: 5000000,  inPerson: '0.15% + 6¢',  keyed: '0.15% + 15¢' },
+  { tier: 6, volumeRange: '$5M+',          volumeMin: 5000001, volumeMax: Infinity, inPerson: 'Custom',       keyed: 'Custom'       },
 ]
 
 export const US_TIERS: HelcimTier[] = CREDIT_TIERS
@@ -45,6 +45,26 @@ export const FEE_SAVER_CA = {
   customerRateInPerson: '2.4%',
   customerRateOnline: '3.0%',
   note: '3% in most cases — can vary by card type and international transactions.',
+}
+
+// Interchange + card brand fee constants (derived from Helcim partner pricing screenshots).
+// These reflect a blended estimate at a typical card mix — true interchange is set by the
+// card networks (Visa/Mastercard/Amex) and revised twice a year (April & October).
+// Refresh against the official published schedules each cycle and bump INTERCHANGE_UPDATED.
+//   Visa:       https://usa.visa.com/support/small-business/regulations-fees.html
+//   Mastercard: https://www.mastercard.com/us/en/business/support/merchant-interchange-rates.html
+// effective_rate = interchange_pct + gradient_markup_pct
+export const INTERCHANGE_UPDATED = 'April 2026'
+
+export const INTERCHANGE = {
+  us: {
+    inPerson: { visaMcDiscover: 1.39, amex: 2.19, pinDebit: 0.60 },
+    keyed:    { visaMcDiscover: 1.81, amex: 2.49 },
+  },
+  ca: {
+    inPerson: { visaMcDiscover: 1.32, amex: 1.78 },
+    keyed:    { visaMcDiscover: 1.88, amex: 2.12 },
+  },
 }
 
 export function detectTier(monthlyVolume: number): number {
